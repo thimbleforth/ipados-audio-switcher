@@ -94,12 +94,6 @@ struct ContentView: View {
             AVRoutePickerViewRepresentable()
                 .frame(width: 200, height: 50)
             
-            Button("Close App") {
-                audioManager.deactivateSession()
-                exit(0)
-            }
-            .foregroundColor(.red)
-            .padding(.top, 40)
         }
         .padding()
         .onAppear {
