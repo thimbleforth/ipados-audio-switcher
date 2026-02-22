@@ -7,16 +7,23 @@ class AudioRouteManager: ObservableObject {
     @Published var currentRouteDescription = "Unknown"
     
     private let session = AVAudioSession.sharedInstance()
+    private var routeChangeObserver: Any?
     
     init() {
         configureCategory()
         updateRouteDescription()
-        NotificationCenter.default.addObserver(
+        routeChangeObserver = NotificationCenter.default.addObserver(
             forName: AVAudioSession.routeChangeNotification,
             object: nil,
             queue: .main
         ) { [weak self] _ in
             self?.updateRouteDescription()
+        }
+    }
+    
+    deinit {
+        if let observer = routeChangeObserver {
+            NotificationCenter.default.removeObserver(observer)
         }
     }
     
