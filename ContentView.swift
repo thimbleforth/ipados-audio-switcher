@@ -28,6 +28,7 @@ class AudioRouteManager: ObservableObject {
                                               .allowBluetoothA2DP,
                                               .defaultToSpeaker])
         } catch {
+            isActive = false
             currentRouteDescription = "Setup error: \(error.localizedDescription)"
         }
     }
