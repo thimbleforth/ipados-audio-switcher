@@ -7,35 +7,53 @@ class AudioRouteManager: ObservableObject {
     @Published var currentRouteDescription = "Unknown"
     
     private let session = AVAudioSession.sharedInstance()
+    private var routeChangeObserver: Any?
     
     init() {
+        configureCategory()
         updateRouteDescription()
-        NotificationCenter.default.addObserver(
+        routeChangeObserver = NotificationCenter.default.addObserver(
             forName: AVAudioSession.routeChangeNotification,
             object: nil,
             queue: .main
-        ) { _ in
-            self.updateRouteDescription()
+        ) { [weak self] _ in
+            self?.updateRouteDescription()
+        }
+    }
+    
+    deinit {
+        if let observer = routeChangeObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+    
+    private func configureCategory() {
+        do {
+            try session.setCategory(.playAndRecord,
+                                    mode: .default,
+                                    options: [.allowBluetooth,
+                                              .allowBluetoothA2DP,
+                                              .defaultToSpeaker])
+        } catch {
+            isActive = false
+            currentRouteDescription = "Setup error: \(error.localizedDescription)"
         }
     }
     
     func activateSession() {
         do {
-            try session.setCategory(.playAndRecord,
-                                    options: [.allowBluetooth,
-                                              .allowBluetoothA2DP,
-                                              .defaultToSpeaker])
             try session.setActive(true)
             isActive = true
             updateRouteDescription()
         } catch {
+            isActive = false
             currentRouteDescription = "Error activating session: \(error.localizedDescription)"
         }
     }
     
     func deactivateSession() {
         do {
-            try session.setActive(false)
+            try session.setActive(false, options: .notifyOthersOnDeactivation)
             isActive = false
             updateRouteDescription()
         } catch {
@@ -56,15 +74,17 @@ struct ContentView: View {
     var body: some View {
         VStack(spacing: 24) {
             
-            Toggle("Enable Audio Override", isOn: $audioManager.isActive)
-                .onChange(of: audioManager.isActive) { oldValue, newValue in
+            Toggle("Enable Audio Override", isOn: Binding(
+                get: { audioManager.isActive },
+                set: { newValue in
                     if newValue {
                         audioManager.activateSession()
                     } else {
                         audioManager.deactivateSession()
                     }
                 }
-                .padding()
+            ))
+            .padding()
             
             Text("Current Output: \(audioManager.currentRouteDescription)")
                 .font(.headline)
@@ -74,13 +94,11 @@ struct ContentView: View {
             AVRoutePickerViewRepresentable()
                 .frame(width: 200, height: 50)
             
-            Button("Close App") {
-                exit(0)
-            }
-            .foregroundColor(.red)
-            .padding(.top, 40)
         }
         .padding()
+        .onAppear {
+            audioManager.activateSession()
+        }
     }
 }
 
