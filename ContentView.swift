@@ -9,33 +9,43 @@ class AudioRouteManager: ObservableObject {
     private let session = AVAudioSession.sharedInstance()
     
     init() {
+        configureCategory()
         updateRouteDescription()
         NotificationCenter.default.addObserver(
             forName: AVAudioSession.routeChangeNotification,
             object: nil,
             queue: .main
-        ) { _ in
-            self.updateRouteDescription()
+        ) { [weak self] _ in
+            self?.updateRouteDescription()
+        }
+    }
+    
+    private func configureCategory() {
+        do {
+            try session.setCategory(.playAndRecord,
+                                    mode: .default,
+                                    options: [.allowBluetooth,
+                                              .allowBluetoothA2DP,
+                                              .defaultToSpeaker])
+        } catch {
+            currentRouteDescription = "Setup error: \(error.localizedDescription)"
         }
     }
     
     func activateSession() {
         do {
-            try session.setCategory(.playAndRecord,
-                                    options: [.allowBluetooth,
-                                              .allowBluetoothA2DP,
-                                              .defaultToSpeaker])
             try session.setActive(true)
             isActive = true
             updateRouteDescription()
         } catch {
+            isActive = false
             currentRouteDescription = "Error activating session: \(error.localizedDescription)"
         }
     }
     
     func deactivateSession() {
         do {
-            try session.setActive(false)
+            try session.setActive(false, options: .notifyOthersOnDeactivation)
             isActive = false
             updateRouteDescription()
         } catch {
@@ -56,15 +66,17 @@ struct ContentView: View {
     var body: some View {
         VStack(spacing: 24) {
             
-            Toggle("Enable Audio Override", isOn: $audioManager.isActive)
-                .onChange(of: audioManager.isActive) { oldValue, newValue in
+            Toggle("Enable Audio Override", isOn: Binding(
+                get: { audioManager.isActive },
+                set: { newValue in
                     if newValue {
                         audioManager.activateSession()
                     } else {
                         audioManager.deactivateSession()
                     }
                 }
-                .padding()
+            ))
+            .padding()
             
             Text("Current Output: \(audioManager.currentRouteDescription)")
                 .font(.headline)
@@ -75,12 +87,16 @@ struct ContentView: View {
                 .frame(width: 200, height: 50)
             
             Button("Close App") {
+                audioManager.deactivateSession()
                 exit(0)
             }
             .foregroundColor(.red)
             .padding(.top, 40)
         }
         .padding()
+        .onAppear {
+            audioManager.activateSession()
+        }
     }
 }
 
