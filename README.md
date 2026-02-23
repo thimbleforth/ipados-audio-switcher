@@ -21,12 +21,17 @@ Swift Playgrounds creates a starter `ContentView.swift` and `MyApp.swift` for yo
 1. In the playground, tap the **files sidebar** icon (top-left of the editor) to open the file list.
 2. Tap `ContentView.swift`, select all of the existing code, and paste in the full contents of [`ContentView.swift`](ContentView.swift) from this repo.
 3. Tap `MyApp.swift`, select all of the existing code, and paste in the full contents of [`MyApp.swift`](MyApp.swift) from this repo.
+4. Be sure to Save both files
 
-> **Tip:** If the sidebar isn't visible, tap **···** (top-right) and choose **Show File List**.
+> **Tip:** If the sidebar isn't visible, tap the Sidebar button **** (top-left).
 
 ### 3. Run the app
 
 Tap the **Run** button (▶) in the top toolbar. Swift Playgrounds will build the project and launch it in the canvas.
+
+Alternately, click the Preview button on the right. See screenshot:
+
+<img width="755" height="107" alt="image" src="https://github.com/user-attachments/assets/9ac9f720-f4ff-4c07-bad1-51aef473273b" />
 
 The app shows:
 - A **toggle** to enable or disable the audio session override.
