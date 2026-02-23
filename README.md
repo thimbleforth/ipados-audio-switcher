@@ -1,6 +1,8 @@
 # ipados-audio-switcher
 A small piece of Swift code you can run in Playgrounds to dynamically change audio to whatever output, whenever you want.
 
+<img width="1095" height="756" alt="image" src="https://github.com/user-attachments/assets/bdc514f0-1ea0-4f9d-a8ea-96c6c4f0bb4c" />
+
 ## Using this in Swift Playgrounds
 
 The following steps assume you are on an iPad running iPadOS 16 or later with the [Swift Playgrounds](https://apps.apple.com/app/swift-playgrounds/id908519492) app installed.
